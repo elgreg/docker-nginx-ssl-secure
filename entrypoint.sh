@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 cat <<EOF
 Welcome to the marvambass/nginx-ssl-secure container
@@ -19,7 +19,7 @@ EOF
 
 if [ -z ${DH_SIZE+x} ]
 then
-  >&2 echo ">> no \$DH_SIZE specified using default" 
+  >&2 echo ">> no \$DH_SIZE specified using default"
   DH_SIZE="2048"
 fi
 

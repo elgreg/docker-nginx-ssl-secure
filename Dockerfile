@@ -1,9 +1,9 @@
-FROM nginx
-MAINTAINER MarvAmBass
+FROM nginx:alpine
+MAINTAINER elgreg
 
 ENV LANG C.UTF-8
 
-RUN apt-get update; apt-get install -y \
+RUN apk update; apk add \
     openssl
 
 RUN rm -rf /etc/nginx/conf.d/*; \

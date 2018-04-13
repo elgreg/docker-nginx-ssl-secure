@@ -13,6 +13,9 @@ RUN sed -i 's/access_log.*/access_log \/dev\/stdout;/g' /etc/nginx/nginx.conf; \
     sed -i 's/error_log.*/error_log \/dev\/stdout info;/g' /etc/nginx/nginx.conf; \
     sed -i 's/^pid/daemon off;\npid/g' /etc/nginx/nginx.conf
 
+ADD ./etc/minica /opt/minica
+RUN chmod a+x /opt/minica
+
 ADD basic.conf /etc/nginx/conf.d/basic.conf
 ADD ssl.conf /etc/nginx/conf.d/ssl.conf
 

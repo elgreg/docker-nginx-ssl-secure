@@ -9,6 +9,7 @@
 # This is an example
 
 docker run \
+-p 80:80 \
 -p 443:443 \
 -e 'DH_SIZE=512' \
 -e 'SSL_DOMAIN=local.dev.club.stuff' \

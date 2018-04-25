@@ -1,7 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 
 cat <<EOF
-Welcome to the marvambass/nginx-ssl-secure container
+Welcome to the slate/nginx-ssl-secure container, based
+on the marvambass/nginx-ssl-secure container
 
 IMPORTANT:
   IF you use SSL inside your personal NGINX-config,
@@ -19,7 +20,7 @@ EOF
 
 if [ -z ${DH_SIZE+x} ]
 then
-  >&2 echo ">> no \$DH_SIZE specified using default" 
+  >&2 echo ">> no \$DH_SIZE specified using default"
   DH_SIZE="2048"
 fi
 
@@ -36,18 +37,46 @@ then
   openssl dhparam -out "$DH" $DH_SIZE
 fi
 
-if [ ! -e "/etc/nginx/external/cert.pem" ] || [ ! -e "/etc/nginx/external/key.pem" ]
+
+if [ -z "${SSL_DOMAIN}" ]
 then
-  echo ">> generating self signed cert"
-  openssl req -x509 -newkey rsa:4086 \
-  -subj "/C=XX/ST=XXXX/L=XXXX/O=XXXX/CN=localhost" \
-  -keyout "/etc/nginx/external/key.pem" \
-  -out "/etc/nginx/external/cert.pem" \
-  -days 3650 -nodes -sha256
+  >&2 echo ">> no \$SSL_DOMAIN specified using default local.dev.club.stuff"
+  SSL_DOMAIN="local.dev.club.stuff"
 fi
+
+echo "running minica for ${SSL_DOMAIN}"
+
+cd /etc/nginx/external
+
+/opt/minica --domains "$SSL_DOMAIN"
+
+
+# if [ ! -e "/etc/nginx/external/cert.pem" ] || [ ! -e "/etc/nginx/external/key.pem" ]
+# then
+#   echo ">> generating self signed cert"
+#   openssl req -x509 -newkey rsa:4086 \
+#   -subj "/C=XX/ST=XXXX/L=XXXX/O=XXXX/CN=${SSL_DOMAIN}" \
+#   -ca
+#   -keyout "/etc/nginx/external/key.pem" \
+#   -out "/etc/nginx/external/cert.pem" \
+#   -days 3650 -nodes -sha256
+# fi
 
 echo ">> copy /etc/nginx/external/*.conf files to /etc/nginx/conf.d/"
 cp /etc/nginx/external/*.conf /etc/nginx/conf.d/ 2> /dev/null > /dev/null
+
+
+cat <<EOF
+
+This script generated a new root certificate called minica
+in whatever folder you specified to moun to /etc/nginx/external.
+
+To use it and get secure local ssl (i.e. for testing services workers),
+you will need to install it in your OS. On Mac run:
+
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain minica.pem
+
+EOF
 
 # exec CMD
 echo ">> exec docker CMD"

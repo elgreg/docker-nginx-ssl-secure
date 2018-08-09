@@ -44,27 +44,13 @@ then
   SSL_DOMAIN="local.dev.club.stuff"
 fi
 
-echo "running minica for ${SSL_DOMAIN}"
-
 cd /etc/nginx/external
 
+
+if [ ! -z "${USE_MINICA}" ]
+then
+echo "running minica for ${SSL_DOMAIN}"
 /opt/minica --domains "$SSL_DOMAIN"
-
-
-# if [ ! -e "/etc/nginx/external/cert.pem" ] || [ ! -e "/etc/nginx/external/key.pem" ]
-# then
-#   echo ">> generating self signed cert"
-#   openssl req -x509 -newkey rsa:4086 \
-#   -subj "/C=XX/ST=XXXX/L=XXXX/O=XXXX/CN=${SSL_DOMAIN}" \
-#   -ca
-#   -keyout "/etc/nginx/external/key.pem" \
-#   -out "/etc/nginx/external/cert.pem" \
-#   -days 3650 -nodes -sha256
-# fi
-
-echo ">> copy /etc/nginx/external/*.conf files to /etc/nginx/conf.d/"
-cp /etc/nginx/external/*.conf /etc/nginx/conf.d/ 2> /dev/null > /dev/null
-
 
 cat <<EOF
 
@@ -77,6 +63,23 @@ you will need to install it in your OS. On Mac run:
 sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain minica.pem
 
 EOF
+fi
+
+if [ -z "${USE_MINICA}" ] && [ ! -e "/etc/nginx/external/${SSL_DOMAIN}/cert.pem" ] || [ ! -e "/etc/nginx/external/${SSL_DOMAIN}/key.pem" ]
+then
+  echo ">> generating self signed cert"
+  openssl req -x509 -newkey rsa:4086 \
+  -subj "/C=XX/ST=XXXX/L=XXXX/O=XXXX/CN=${SSL_DOMAIN}" \
+  -keyout "/etc/nginx/external/${SSL_DOMAIN}/key.pem" \
+  -out "/etc/nginx/external/${SSL_DOMAIN}/cert.pem" \
+  -days 3650 -nodes -sha256
+fi
+
+
+echo ">> copy /etc/nginx/external/*.conf files to /etc/nginx/conf.d/"
+cp /etc/nginx/external/*.conf /etc/nginx/conf.d/ 2> /dev/null > /dev/null
+
+
 
 # exec CMD
 echo ">> exec docker CMD"

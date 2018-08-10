@@ -1,1 +1,1 @@
-console.log('Hello from sw.js');
+console.log('Hello DCJS! Successfully registered sw.js');

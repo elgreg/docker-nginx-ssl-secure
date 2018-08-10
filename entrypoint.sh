@@ -55,7 +55,7 @@ echo "running minica for ${SSL_DOMAIN}"
 cat <<EOF
 
 This script generated a new root certificate called minica
-in whatever folder you specified to moun to /etc/nginx/external.
+in whatever folder you specified to run to /etc/nginx/external.
 
 To use it and get secure local ssl (i.e. for testing services workers),
 you will need to install it in your OS. On Mac run:

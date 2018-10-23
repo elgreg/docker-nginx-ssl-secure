@@ -62,6 +62,44 @@ cd /etc/nginx/external
 #   -days 3650 -nodes -sha256
 # fi
 
+
+# Create base localhost.conf if none exists
+if [ ! -e "/etc/nginx/external/localhost.conf" ]
+then
+echo ">> No localhost.conf specified. Generating one for ${SSL_DOMAIN}"
+cat >/etc/nginx/external/localhost.conf <<EOF
+
+server {
+	listen 80 default_server;
+	listen [::]:80 default_server;
+	server_name ${SSL_DOMAIN};
+	return 301 https://$host$request_uri;
+}
+
+server {
+
+  listen 443 ssl;
+  server_name ${SSL_DOMAIN};
+
+  add_header Strict-Transport-Security "max-age=31536000; includeSubdomains";
+
+  # Change servername here
+  ssl_certificate /etc/nginx/external/${SSL_DOMAIN}/cert.pem;
+  ssl_certificate_key /etc/nginx/external/${SSL_DOMAIN}/key.pem;
+
+  root /usr/share/nginx/html/;
+
+  location / {
+    autoindex on;
+    try_files \$uri \$uri/index.html =404;
+  }
+
+}
+
+EOF
+fi
+
+
 echo ">> copy /etc/nginx/external/*.conf files to /etc/nginx/conf.d/"
 cp /etc/nginx/external/*.conf /etc/nginx/conf.d/ 2> /dev/null > /dev/null
 
